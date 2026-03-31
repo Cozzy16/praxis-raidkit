@@ -1,0 +1,34 @@
+app = "your-app-name"          # ← Change this to your actual app name
+primary_region = "sin"         # Change to your preferred region (e.g. sin, fra, nrt, iad, etc.)
+
+[build]
+  # If you have a Dockerfile, Fly will use it automatically.
+  # If not, you can specify builder here or let `fly launch` handle it.
+
+[http_service]
+  internal_port = 8080                 # Uvicorn should listen on this port
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "connections"
+    hard_limit = 1000
+    soft_limit = 800
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+[env]
+  PORT = "8080"          # Important: Tell your app to read from $PORT if needed
